@@ -1,0 +1,190 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Message Details - PropertyPortal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'messaging:list' %}">Messages</a></li>
+                    <li class="breadcrumb-item active">Message Details</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Message Details -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-envelope"></i> Message Details
+                        </h5>
+                        <span class="badge bg-{% if enquiry.status == 'new' %}primary{% elif enquiry.status == 'read' %}info{% elif enquiry.status == 'replied' %}success{% else %}secondary{% endif %}">
+                            {{ enquiry.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Property Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            {% if enquiry.property.images.first %}
+                                <img src="{{ enquiry.property.images.first.image.url }}" class="img-fluid rounded" 
+                                     alt="{{ enquiry.property.title }}">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="height: 120px;">
+                                    <i class="fas fa-home fa-2x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h6><a href="{% url 'properties:detail' enquiry.property.pk %}" class="text-decoration-none">{{ enquiry.property.title }}</a></h6>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-map-marker-alt"></i> {{ enquiry.property.city }}, {{ enquiry.property.state }}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-tag"></i> {{ enquiry.property.get_listing_type_display }} - ₹{{ enquiry.property.price|floatformat:0 }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Message Content -->
+                    <div class="mb-4">
+                        <h6>Subject: {{ enquiry.subject|default:"No subject" }}</h6>
+                        <div class="border rounded p-3 bg-light">
+                            {{ enquiry.message|linebreaks }}
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>From: {{ enquiry.sender.get_full_name|default:enquiry.sender.username }}</h6>
+                            {% if enquiry.phone %}
+                                <p class="text-muted"><i class="fas fa-phone"></i> {{ enquiry.phone }}</p>
+                            {% endif %}
+                            {% if enquiry.email %}
+                                <p class="text-muted"><i class="fas fa-envelope"></i> {{ enquiry.email }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Date: {{ enquiry.created|date:"M d, Y H:i" }}</h6>
+                            <p class="text-muted">Message ID: #{{ enquiry.pk }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Thread -->
+            {% if messages %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-comments"></i> Message Thread</h6>
+                </div>
+                <div class="card-body">
+                    {% for message in messages %}
+                    <div class="d-flex mb-3 {% if message.sender == user %}justify-content-end{% endif %}">
+                        <div class="{% if message.sender == user %}order-2{% endif %}">
+                            <div class="bg-{% if message.sender == user %}primary{% else %}light{% endif %} text-{% if message.sender == user %}white{% else %}dark{% endif %} rounded p-3" 
+                                 style="max-width: 70%;">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <strong>{{ message.sender.get_full_name|default:message.sender.username }}</strong>
+                                    <small>{{ message.created|date:"M d, H:i" }}</small>
+                                </div>
+                                <div>{{ message.content|linebreaks }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Reply Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-reply"></i> Reply to Message</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.content.id_for_label }}" class="form-label">Your Reply</label>
+                            {{ form.content }}
+                            <div class="invalid-feedback">
+                                Please provide your reply.
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'messaging:list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Messages
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Reply
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'properties:detail' enquiry.property.pk %}" class="btn btn-outline-primary">
+                            <i class="fas fa-eye"></i> View Property
+                        </a>
+                        
+                        {% if enquiry.recipient == user %}
+                        <a href="{% url 'messaging:reply' enquiry.pk %}" class="btn btn-primary">
+                            <i class="fas fa-reply"></i> Reply
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'messaging:list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list"></i> All Messages
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Owner Info -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-user"></i> Property Owner</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-user fa-2x text-white"></i>
+                        </div>
+                    </div>
+                    <h6 class="text-center">{{ enquiry.property.host.get_full_name|default:enquiry.property.host.username }}</h6>
+                    <p class="text-muted text-center">{{ enquiry.property.host.email }}</p>
+                    {% if enquiry.property.host.phone %}
+                        <p class="text-muted text-center">
+                            <i class="fas fa-phone"></i> {{ enquiry.property.host.phone }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+

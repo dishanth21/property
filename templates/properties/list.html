@@ -1,0 +1,213 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Browse Properties - PropertyPortal{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Hero Section -->
+    <div class="row bg-primary text-white py-5 mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-4">Find Your Dream Property</h1>
+            <p class="lead">Discover amazing properties for sale and rent</p>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ search_query }}" placeholder="Search properties...">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="type" class="form-label">Property Type</label>
+                            <select class="form-select" id="type" name="type">
+                                <option value="">All Types</option>
+                                {% for value, label in property_types %}
+                                    <option value="{{ value }}" {% if property_type == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="listing_type" class="form-label">Listing Type</label>
+                            <select class="form-select" id="listing_type" name="listing_type">
+                                <option value="">All</option>
+                                {% for value, label in listing_types %}
+                                    <option value="{{ value }}" {% if listing_type == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="city" name="city" 
+                                   value="{{ city }}" placeholder="Enter city...">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="min_price" class="form-label">Min Price</label>
+                            <input type="number" class="form-control" id="min_price" name="min_price" 
+                                   value="{{ min_price }}" placeholder="Min price">
+                        </div>
+                        <div class="col-md-1">
+                            <label for="max_price" class="form-label">Max Price</label>
+                            <input type="number" class="form-control" id="max_price" name="max_price" 
+                                   value="{{ max_price }}" placeholder="Max price">
+                        </div>
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <a href="{% url 'properties:list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Properties Grid -->
+    <div class="row">
+        {% for property in properties %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 property-card">
+                {% if property.images.first %}
+                    <img src="{{ property.images.first.image.url }}" class="card-img-top property-image" 
+                         alt="{{ property.title }}">
+                {% else %}
+                    <div class="card-img-top property-image-placeholder d-flex align-items-center justify-content-center">
+                        <i class="fas fa-home fa-3x text-muted"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title">{{ property.title }}</h5>
+                        {% if property.is_featured %}
+                            <span class="badge bg-warning">Featured</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-map-marker-alt"></i> {{ property.city }}, {{ property.state }}
+                    </p>
+                    
+                    <p class="card-text text-truncate">{{ property.description|truncatewords:20 }}</p>
+                    
+                    <div class="property-details mt-auto">
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <small class="text-muted">Bedrooms</small>
+                                <div><i class="fas fa-bed"></i> {{ property.bedrooms }}</div>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Bathrooms</small>
+                                <div><i class="fas fa-bath"></i> {{ property.bathrooms }}</div>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Area</small>
+                                <div><i class="fas fa-expand-arrows-alt"></i> {{ property.sqft|default:"N/A" }} sqft</div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="text-primary mb-0">₹{{ property.price|floatformat:0 }}</h4>
+                            <span class="badge bg-info">{{ property.get_listing_type_display }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <a href="{% url 'properties:detail' property.pk %}" class="btn btn-primary w-100">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h3>No properties found</h3>
+                <p class="text-muted">Try adjusting your search criteria</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if properties.has_other_pages %}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Properties pagination">
+                <ul class="pagination justify-content-center">
+                    {% if properties.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if property_type %}&type={{ property_type }}{% endif %}{% if listing_type %}&listing_type={{ listing_type }}{% endif %}{% if city %}&city={{ city }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ properties.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if property_type %}&type={{ property_type }}{% endif %}{% if listing_type %}&listing_type={{ listing_type }}{% endif %}{% if city %}&city={{ city }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">{{ properties.number }} of {{ properties.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if properties.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ properties.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if property_type %}&type={{ property_type }}{% endif %}{% if listing_type %}&listing_type={{ listing_type }}{% endif %}{% if city %}&city={{ city }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ properties.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if property_type %}&type={{ property_type }}{% endif %}{% if listing_type %}&listing_type={{ listing_type }}{% endif %}{% if city %}&city={{ city }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.property-card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.property-image {
+    height: 250px;
+    object-fit: cover;
+}
+
+.property-image-placeholder {
+    height: 250px;
+    background-color: #f8f9fa;
+}
+
+.property-details {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+</style>
+{% endblock %}
+
+
+

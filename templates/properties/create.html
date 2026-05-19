@@ -1,0 +1,343 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Add Property - PropertyPortal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'properties:list' %}">Properties</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'properties:my_properties' %}">My Properties</a></li>
+                    <li class="breadcrumb-item active">Add Property</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-plus-circle"></i> Add New Property
+                    </h3>
+                    <p class="text-muted mb-0">Fill in the details to list your property</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Basic Information</h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="{{ form.title.id_for_label }}" class="form-label">Property Title *</label>
+                                    {{ form.title }}
+                                    <div class="invalid-feedback">
+                                        Please provide a property title.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.property_type.id_for_label }}" class="form-label">Property Type *</label>
+                                    {{ form.property_type }}
+                                    <div class="invalid-feedback">
+                                        Please select a property type.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.listing_type.id_for_label }}" class="form-label">Listing Type *</label>
+                                    {{ form.listing_type }}
+                                    <div class="invalid-feedback">
+                                        Please select a listing type.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.price.id_for_label }}" class="form-label">Price (₹) *</label>
+                                    {{ form.price }}
+                                    <div class="invalid-feedback">
+                                        Please provide a valid price.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description *</label>
+                            {{ form.description }}
+                            <div class="invalid-feedback">
+                                Please provide a property description.
+                            </div>
+                        </div>
+
+                        <!-- Location Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Location Information</h5>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.address.id_for_label }}" class="form-label">Address *</label>
+                            {{ form.address }}
+                            <div class="form-text">Start typing to search with Google Places.</div>
+                            <div class="invalid-feedback">Please provide the property address.</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.city.id_for_label }}" class="form-label">City *</label>
+                                    {{ form.city }}
+                                    <div class="invalid-feedback">
+                                        Please provide the city.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.state.id_for_label }}" class="form-label">State *</label>
+                                    {{ form.state }}
+                                    <div class="invalid-feedback">
+                                        Please provide the state.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.zip_code.id_for_label }}" class="form-label">ZIP Code *</label>
+                                    {{ form.zip_code }}
+                                    <div class="invalid-feedback">
+                                        Please provide the ZIP code.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Property Details -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Property Details</h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="{{ form.bedrooms.id_for_label }}" class="form-label">Bedrooms</label>
+                                    {{ form.bedrooms }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="{{ form.bathrooms.id_for_label }}" class="form-label">Bathrooms</label>
+                                    {{ form.bathrooms }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="{{ form.sqft.id_for_label }}" class="form-label">Area (sqft)</label>
+                                    {{ form.sqft }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="{{ form.year_built.id_for_label }}" class="form-label">Year Built</label>
+                                    {{ form.year_built }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Features -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Features</h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    {{ form.has_parking }}
+                                    <label class="form-check-label" for="{{ form.has_parking.id_for_label }}">
+                                        {{ form.has_parking.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.has_garden }}
+                                    <label class="form-check-label" for="{{ form.has_garden.id_for_label }}">
+                                        {{ form.has_garden.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.has_balcony }}
+                                    <label class="form-check-label" for="{{ form.has_balcony.id_for_label }}">
+                                        {{ form.has_balcony.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.has_pool }}
+                                    <label class="form-check-label" for="{{ form.has_pool.id_for_label }}">
+                                        {{ form.has_pool.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    {{ form.has_gym }}
+                                    <label class="form-check-label" for="{{ form.has_gym.id_for_label }}">
+                                        {{ form.has_gym.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.has_security }}
+                                    <label class="form-check-label" for="{{ form.has_security.id_for_label }}">
+                                        {{ form.has_security.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.is_furnished }}
+                                    <label class="form-check-label" for="{{ form.is_furnished.id_for_label }}">
+                                        {{ form.is_furnished.label }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.is_featured }}
+                                    <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                                        {{ form.is_featured.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Images Upload -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Photos</h5>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="id_images">Upload Images</label>
+                                    <input type="file" id="id_images" name="images" class="form-control" accept="image/*" multiple>
+                                    <div class="form-text">First image will be set as primary. You can upload multiple images.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden geolocation fields -->
+                        {{ form.latitude }}
+                        {{ form.longitude }}
+
+                        <div id="map" style="height: 300px;" class="mb-4 d-none"></div>
+
+                        <!-- Submit Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'properties:my_properties' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary" id="create-property-btn">
+                                        <i class="fas fa-save"></i> Create Property
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const button = document.getElementById('create-property-btn');
+    const originalText = button.innerHTML;
+    
+    form.addEventListener('submit', function(e) {
+        console.log('Property form submitted!');
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Property...';
+        button.disabled = true;
+        
+        // Re-enable after 15 seconds as fallback
+        setTimeout(function() {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }, 15000);
+    });
+    // Initialize Google Places Autocomplete
+    function initAutocomplete() {
+        const addressInput = document.getElementById('id_address');
+        if (!addressInput) return;
+
+        const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+            fields: ['address_components', 'geometry'],
+            types: ['geocode']
+        });
+
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry) return;
+
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            const latInput = document.getElementById('id_latitude');
+            const lngInput = document.getElementById('id_longitude');
+            if (latInput) latInput.value = lat;
+            if (lngInput) lngInput.value = lng;
+
+            // Fill city/state/zip/country if available
+            const comps = place.address_components || [];
+            const byType = (t) => comps.find(c => (c.types || []).includes(t));
+            const city = byType('locality') || byType('administrative_area_level_2');
+            const state = byType('administrative_area_level_1');
+            const zip = byType('postal_code');
+            const country = byType('country');
+
+            if (city && document.getElementById('id_city')) document.getElementById('id_city').value = city.long_name;
+            if (state && document.getElementById('id_state')) document.getElementById('id_state').value = state.long_name;
+            if (zip && document.getElementById('id_zip')) document.getElementById('id_zip').value = zip.long_name;
+            if (country && document.getElementById('id_country')) document.getElementById('id_country').value = country.long_name;
+
+            // Show map preview
+            const mapEl = document.getElementById('map');
+            if (mapEl) {
+                mapEl.classList.remove('d-none');
+                const map = new google.maps.Map(mapEl, { center: { lat, lng }, zoom: 14 });
+                new google.maps.Marker({ position: { lat, lng }, map });
+            }
+        });
+    }
+
+    if (window.google && window.google.maps && window.google.maps.places) {
+        initAutocomplete();
+    } else {
+        window.initMapAutocomplete = initAutocomplete;
+    }
+});
+</script>
+{% if GOOGLE_MAPS_API_KEY %}
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initMapAutocomplete"></script>
+{% endif %}
+{% endblock %}

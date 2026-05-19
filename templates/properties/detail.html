@@ -1,0 +1,271 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ property.title }} - PropertyPortal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Property Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'properties:list' %}">Properties</a></li>
+                    <li class="breadcrumb-item active">{{ property.title }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Property Images / Map -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body p-0">
+                    {% if images %}
+                        <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for image in images %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <img src="{{ image.image.url }}" class="d-block w-100 property-detail-image" 
+                                         alt="{{ property.title }}">
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if images|length > 1 %}
+                            <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="property-detail-image-placeholder d-flex align-items-center justify-content-center">
+                            <i class="fas fa-home fa-5x text-muted"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if property.latitude and property.longitude %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Location</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="detailMap" style="height: 350px;"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Property Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">{{ property.title }}</h3>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-map-marker-alt"></i> {{ property.address }}, {{ property.city }}, {{ property.state }} {{ property.zip_code }}
+                    </p>
+                </div>
+                <div class="card-body">
+                    <h5>Description</h5>
+                    <p>{{ property.description|linebreaks }}</p>
+                    
+                    <h5>Property Details</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><strong>Property Type:</strong> {{ property.get_property_type_display }}</li>
+                                <li><strong>Listing Type:</strong> {{ property.get_listing_type_display }}</li>
+                                <li><strong>Bedrooms:</strong> {{ property.bedrooms }}</li>
+                                <li><strong>Bathrooms:</strong> {{ property.bathrooms }}</li>
+                                <li><strong>Area:</strong> {{ property.sqft|default:"N/A" }} sqft</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><strong>Lot Size:</strong> {{ property.lot_size|default:"N/A" }} sqft</li>
+                                <li><strong>Year Built:</strong> {{ property.year_built|default:"N/A" }}</li>
+                                <li><strong>Price per sqft:</strong> ₹{{ property.price_per_sqft|default:"N/A" }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Features -->
+                    <h5>Features</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                {% if property.has_parking %}<li><i class="fas fa-check text-success"></i> Parking</li>{% endif %}
+                                {% if property.has_garden %}<li><i class="fas fa-check text-success"></i> Garden</li>{% endif %}
+                                {% if property.has_balcony %}<li><i class="fas fa-check text-success"></i> Balcony</li>{% endif %}
+                                {% if property.has_pool %}<li><i class="fas fa-check text-success"></i> Swimming Pool</li>{% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                {% if property.has_gym %}<li><i class="fas fa-check text-success"></i> Gym</li>{% endif %}
+                                {% if property.has_security %}<li><i class="fas fa-check text-success"></i> Security</li>{% endif %}
+                                {% if property.is_furnished %}<li><i class="fas fa-check text-success"></i> Furnished</li>{% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Additional Features -->
+                    {% if features %}
+                    <h5>Additional Features</h5>
+                    <div class="d-flex flex-wrap">
+                        {% for feature in features %}
+                        <span class="badge bg-secondary me-2 mb-2">{{ feature.feature_name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contact Host -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Contact Host</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p><strong>Host:</strong> {{ property.host.get_full_name|default:property.host.username }}</p>
+                            <p><strong>Email:</strong> {{ property.host.email }}</p>
+                            {% if property.host.phone %}
+                            <p><strong>Phone:</strong> {{ property.host.phone }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-end">
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'messaging:property_enquire' property.pk %}" class="btn btn-primary">
+                                    <i class="fas fa-envelope"></i> Send Enquiry
+                                </a>
+                            {% else %}
+                                <a href="{% url 'accounts:login' %}" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt"></i> Login to Enquire
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Info Sidebar -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <h2 class="text-primary mb-3">₹{{ property.price|floatformat:0 }}</h2>
+                    <p class="text-muted">{{ property.get_listing_type_display }}</p>
+                    {% if property.price_per_sqft %}
+                    <p class="small text-muted">₹{{ property.price_per_sqft }} per sqft</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                        {% if user == property.host %}
+                            <a href="{% url 'properties:edit' property.pk %}" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="fas fa-edit"></i> Edit Property
+                            </a>
+                        {% else %}
+                            <a href="{% url 'messaging:property_enquire' property.pk %}" class="btn btn-primary w-100 mb-2">
+                                <i class="fas fa-envelope"></i> Send Enquiry
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-sign-in-alt"></i> Login to Enquire
+                        </a>
+                    {% endif %}
+                    
+                    <button class="btn btn-outline-secondary w-100" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print Details
+                    </button>
+                </div>
+            </div>
+
+            <!-- Related Properties -->
+            {% if related_properties %}
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Similar Properties</h6>
+                </div>
+                <div class="card-body">
+                    {% for related in related_properties %}
+                    <div class="d-flex mb-3">
+                        {% if related.images.first %}
+                            <img src="{{ related.images.first.image.url }}" class="rounded me-3" 
+                                 style="width: 60px; height: 60px; object-fit: cover;" alt="{{ related.title }}">
+                        {% else %}
+                            <div class="rounded me-3 d-flex align-items-center justify-content-center bg-light" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-home text-muted"></i>
+                            </div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1"><a href="{% url 'properties:detail' related.pk %}" class="text-decoration-none">{{ related.title }}</a></h6>
+                            <p class="text-muted small mb-1">{{ related.city }}</p>
+                            <p class="text-primary mb-0">₹{{ related.price|floatformat:0 }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.property-detail-image {
+    height: 500px;
+    object-fit: cover;
+}
+
+.property-detail-image-placeholder {
+    height: 500px;
+    background-color: #f8f9fa;
+}
+
+@media print {
+    .navbar, .card-header, .btn, footer {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{% if property.latitude and property.longitude and GOOGLE_MAPS_API_KEY %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const lat = parseFloat('{{ property.latitude|default_if_none:"" }}') || 0;
+    const lng = parseFloat('{{ property.longitude|default_if_none:"" }}') || 0;
+    const el = document.getElementById('detailMap');
+    if (!el) return;
+    function init() {
+        const map = new google.maps.Map(el, { center: { lat, lng }, zoom: 14 });
+        new google.maps.Marker({ position: { lat, lng }, map });
+    }
+    if (window.google && window.google.maps) init();
+    else window.initDetailMap = init;
+});
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initDetailMap"></script>
+{% endif %}
+{% endblock %}
+
+
+
